@@ -1,0 +1,210 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id_usuario     Int    @id @default(autoincrement())
+  nombre_usuario String @db.VarChar(50)
+  email          String @unique @db.VarChar(100)
+  password       String @db.VarChar(255)
+  rol            Rol
+}
+
+model Cliente {
+  id_cliente      Int            @id @default(autoincrement())
+  nombre_cliente  String         @db.VarChar(100)
+  cedula          String         @unique @db.VarChar(20)
+  correo          String         @unique @db.VarChar(100)
+  telefono        String         @db.VarChar(20)
+  facturas        Factura[]
+  motos_cliente   MotoCliente[]
+  ventas_directas VentaDirecta[]
+}
+
+//Listo
+model Factura {
+  id_factura         Int            @id @default(autoincrement())
+  fecha              DateTime       @default(now())
+  pago_efectivo      Decimal        @default(0) @db.Decimal(12, 2)
+  pago_tarjeta       Decimal        @default(0) @db.Decimal(12, 2)
+  pago_transferencia Decimal        @default(0) @db.Decimal(12, 2)
+  subtotal           Decimal        @default(0) @db.Decimal(12, 2)
+  descuento          Decimal        @default(0) @db.Decimal(12, 2)
+  iva                Decimal        @default(0) @db.Decimal(12, 2)
+  total              Decimal        @default(0) @db.Decimal(12, 2)
+  vendedor           String         @default("Por asignar") @db.VarChar(100)
+  id_cliente         Int
+  cliente            Cliente        @relation(fields: [id_cliente], references: [id_cliente], onDelete: Cascade, onUpdate: Cascade)
+  id_orden_servicio  Int?           @unique // Relación opcional con OrdenServicio
+  orden_servicio     OrdenServicio? @relation(fields: [id_orden_servicio], references: [id_orden_servicio], onDelete: Cascade, onUpdate: Cascade)
+  id_venta_directa   Int?           @unique // Relación opcional con VentaDirecta
+  venta_directa      VentaDirecta?  @relation(fields: [id_venta_directa], references: [id_venta], onDelete: Cascade, onUpdate: Cascade)
+}
+
+//Listo
+model MotoCliente {
+  id_moto_cliente  Int             @id @default(autoincrement())
+  marca            String          @db.VarChar(50)
+  modelo           String          @db.VarChar(50)
+  ano              Int
+  placa            String          @unique @db.VarChar(20)
+  id_cliente       Int
+  cliente          Cliente         @relation(fields: [id_cliente], references: [id_cliente], onDelete: Cascade, onUpdate: Cascade)
+  ordenes_servicio OrdenServicio[]
+}
+
+//Listo
+model OrdenServicio {
+  id_orden_servicio      Int                     @id @default(autoincrement())
+  fecha                  DateTime                @default(now())
+  estado                 String                  @db.VarChar(50)
+  subtotal               Decimal                 @default(0) @db.Decimal(12, 2)
+  descuento              Decimal                 @default(0) @db.Decimal(12, 2)
+  iva                    Decimal                 @default(0) @db.Decimal(12, 2)
+  total                  Decimal                 @db.Decimal(12, 2)
+  adelanto_efectivo      Decimal                 @default(0) @db.Decimal(12, 2)
+  adelanto_tarjeta       Decimal                 @default(0) @db.Decimal(12, 2)
+  adelanto_transferencia Decimal                 @default(0) @db.Decimal(12, 2)
+  guardar_cascos         Boolean
+  guardar_papeles        Boolean
+  observaciones          String                  @db.Text
+  observaciones_mecanico String                  @default("Por asignar") @db.Text
+  observaciones_factura  String                  @default("Por asignar") @db.Text
+  mecanico               String                  @default("Por asignar") @db.VarChar(100)
+  vendedor               String                  @default("Por asignar") @db.VarChar(100)
+  id_moto_cliente        Int
+  moto_cliente           MotoCliente             @relation(fields: [id_moto_cliente], references: [id_moto_cliente], onDelete: Cascade, onUpdate: Cascade)
+  servicios              ServicioOrdenServicio[]
+  repuestos              RepuestoOrdenServicio[]
+  factura                Factura?
+}
+
+//Listo
+model Servicio {
+  id_servicio      Int                     @id @default(autoincrement())
+  nombre_servicio  String                  @unique @db.VarChar(255)
+  ordenes_servicio ServicioOrdenServicio[]
+}
+
+model ServicioOrdenServicio {
+  id_orden_servicio Int
+  id_servicio       Int
+  precio            Decimal       @db.Decimal(12, 2)
+  orden_servicio    OrdenServicio @relation(fields: [id_orden_servicio], references: [id_orden_servicio], onDelete: Cascade, onUpdate: Cascade)
+  servicio          Servicio      @relation(fields: [id_servicio], references: [id_servicio], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([id_orden_servicio, id_servicio])
+}
+
+model VentaDirecta {
+  id_venta           Int             @id @default(autoincrement())
+  fecha              DateTime        @default(now())
+  pago_efectivo      Decimal         @default(0) @db.Decimal(12, 2)
+  pago_tarjeta       Decimal         @default(0) @db.Decimal(12, 2)
+  pago_transferencia Decimal         @default(0) @db.Decimal(12, 2)
+  subtotal           Decimal         @default(0) @db.Decimal(12, 2)
+  descuento          Decimal         @default(0) @db.Decimal(12, 2)
+  iva                Decimal         @default(0) @db.Decimal(12, 2)
+  total              Decimal         @db.Decimal(12, 2)
+  vendedor           String          @default("Por asignar") @db.VarChar(100)
+  id_cliente         Int
+  cliente            Cliente         @relation(fields: [id_cliente], references: [id_cliente], onDelete: Cascade, onUpdate: Cascade)
+  repuestos          RepuestoVenta[]
+  factura            Factura?
+}
+
+//Listo
+model MarcaRepuesto {
+  id_marca     Int        @id @default(autoincrement())
+  nombre_marca String     @unique @db.VarChar(50)
+  repuestos    Repuesto[]
+}
+
+//Listo
+model Repuesto {
+  id_repuesto      Int                     @id @default(autoincrement())
+  codigo_barras    String                  @unique @db.VarChar(50)
+  nombre_repuesto  String                  @db.VarChar(100)
+  valor_compra     Decimal                 @default(0) @db.Decimal(12, 2)
+  valor_unitario   Decimal                 @db.Decimal(12, 2)
+  ubicacion        String                  @default("Bodega") @db.VarChar(100)
+  stock            Int                     @default(0)
+  id_marca         Int
+  marca            MarcaRepuesto           @relation(fields: [id_marca], references: [id_marca], onDelete: Cascade, onUpdate: Cascade)
+  ventas           RepuestoVenta[]
+  ordenes_servicio RepuestoOrdenServicio[]
+  motos_mercado    MotoRepuesto[]
+  proveedores      ProveedorRepuesto[]
+}
+
+model RepuestoVenta {
+  id_venta    Int
+  id_repuesto Int
+  cantidad    Int
+  precio      Decimal      @db.Decimal(12, 2)
+  venta       VentaDirecta @relation(fields: [id_venta], references: [id_venta], onDelete: Cascade, onUpdate: Cascade)
+  repuesto    Repuesto     @relation(fields: [id_repuesto], references: [id_repuesto], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([id_venta, id_repuesto])
+}
+
+model RepuestoOrdenServicio {
+  id_orden_servicio Int
+  id_repuesto       Int
+  cantidad          Int
+  precio            Decimal       @db.Decimal(12, 2)
+  orden_servicio    OrdenServicio @relation(fields: [id_orden_servicio], references: [id_orden_servicio], onDelete: Cascade, onUpdate: Cascade)
+  repuesto          Repuesto      @relation(fields: [id_repuesto], references: [id_repuesto], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([id_orden_servicio, id_repuesto])
+}
+
+//Listo
+model MotoMercado {
+  id_moto_mercado Int            @id @default(autoincrement())
+  modelo          String         @unique @db.VarChar(50)
+  repuestos       MotoRepuesto[]
+}
+
+//Listo
+model MotoRepuesto {
+  id_moto_mercado Int
+  id_repuesto     Int
+  moto_mercado    MotoMercado @relation(fields: [id_moto_mercado], references: [id_moto_mercado], onDelete: Cascade, onUpdate: Cascade)
+  repuesto        Repuesto    @relation(fields: [id_repuesto], references: [id_repuesto], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([id_moto_mercado, id_repuesto])
+}
+
+//Listo
+model Proveedor {
+  id_proveedor      Int                 @id @default(autoincrement())
+  nombre_proveedor  String              @db.VarChar(100)
+  nit               String              @unique @db.VarChar(20)
+  telefono          String              @db.VarChar(20)
+  asesor            String              @db.VarChar(100)
+  fecha_vencimiento DateTime
+  repuestos         ProveedorRepuesto[]
+}
+
+model ProveedorRepuesto {
+  id_proveedor Int
+  id_repuesto  Int
+  proveedor    Proveedor @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: Cascade, onUpdate: Cascade)
+  repuesto     Repuesto  @relation(fields: [id_repuesto], references: [id_repuesto], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([id_proveedor, id_repuesto])
+}
+
+enum Rol {
+  ADMINISTRADOR
+  VENDEDOR
+}
