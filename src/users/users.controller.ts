@@ -17,11 +17,11 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRADOR')
   async findAll(
     @Query('page') page: number = 1,
@@ -32,14 +32,24 @@ export class UsersController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRADOR')
   async findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRADOR')
-  async create(@Body() createUserDto: { nombre_usuario: string; email: string; password: string; rol: 'ADMINISTRADOR' | 'VENDEDOR' }) {
+  async create(
+    @Body()
+    createUserDto: {
+      nombre_usuario: string;
+      email: string;
+      password: string;
+      rol: 'ADMINISTRADOR' | 'VENDEDOR';
+    },
+  ) {
     try {
       return await this.usersService.create(createUserDto);
     } catch (error) {
@@ -51,12 +61,23 @@ export class UsersController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRADOR')
-  async update(@Param('id') id: string, @Body() updateUserDto: { nombre_usuario?: string; email?: string; password?: string; rol?: 'ADMINISTRADOR' | 'VENDEDOR' }) {
+  async update(
+    @Param('id') id: string,
+    @Body()
+    updateUserDto: {
+      nombre_usuario?: string;
+      email?: string;
+      password?: string;
+      rol?: 'ADMINISTRADOR' | 'VENDEDOR';
+    },
+  ) {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMINISTRADOR')
   async remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
