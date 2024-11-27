@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { MotoClienteService } from './moto-cliente.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('moto-cliente')
 @UseGuards(JwtAuthGuard)
@@ -51,6 +52,7 @@ export class MotoClienteController {
   }
 
   @Delete(':id')
+  @Roles('ADMINISTRADOR')
   async remove(@Param('id') id: string) {
     return this.motoClienteService.remove(+id);
   }

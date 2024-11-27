@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { RepuestoService } from './repuesto.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('repuesto')
 @UseGuards(JwtAuthGuard)
@@ -66,6 +67,7 @@ export class RepuestoController {
   }
 
   @Delete(':id')
+  @Roles('ADMINISTRADOR')
   async remove(@Param('id') id: string) {
     try {
       return await this.repuestoService.remove(+id);

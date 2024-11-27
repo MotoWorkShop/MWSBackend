@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { MarcaRepuestoService } from './marca-repuesto.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('marca-repuesto')
 @UseGuards(JwtAuthGuard)
@@ -51,6 +52,7 @@ export class MarcaRepuestoController {
   }
 
   @Delete(':id')
+  @Roles('ADMINISTRADOR')
   async remove(@Param('id') id: string) {
     return this.marcaRepuestoService.remove(+id);
   }

@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ProveedorService } from './proveedor.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('proveedor')
 @UseGuards(JwtAuthGuard)
@@ -51,6 +52,7 @@ export class ProveedorController {
   }
 
   @Delete(':id')
+  @Roles('ADMINISTRADOR')
   async remove(@Param('id') id: string) {
     return this.proveedorService.remove(+id);
   }

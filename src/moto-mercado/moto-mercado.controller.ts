@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { MotoMercadoService } from './moto-mercado.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('moto-mercado')
 @UseGuards(JwtAuthGuard)
@@ -51,6 +52,7 @@ export class MotoMercadoController {
   }
 
   @Delete(':id')
+  @Roles('ADMINISTRADOR')
   async remove(@Param('id') id: string) {
     return this.motoMercadoService.remove(+id);
   }

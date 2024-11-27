@@ -1,6 +1,19 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ClientesService } from './clientes.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('clientes')
 @UseGuards(JwtAuthGuard)
@@ -39,6 +52,7 @@ export class ClientesController {
   }
 
   @Delete(':id')
+  @Roles('ADMINISTRADOR')
   async remove(@Param('id') id: string) {
     return this.clientesService.remove(+id);
   }
